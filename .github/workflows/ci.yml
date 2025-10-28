@@ -13,7 +13,7 @@ on:
       - opened
 jobs:
   build:
-    runs-on: test-runner
+    runs-on: test
     steps:
       - name: checkout
         uses: actions/checkout@v5.0.0
@@ -21,7 +21,7 @@ jobs:
         run: docker build -t . --progress=plain --no-cache --tag=dags:latest
   test:
     needs: build
-    runs-on: test-runner
+    runs-on: test
     steps:
       - name: test
         run: docker run dags:latest --name test_dags
@@ -29,7 +29,7 @@ jobs:
     needs:
       - build
       - test
-    runs-on: self-hosted
+    runs-on: test
     if: always()
     steps:
       - name: cleanup
