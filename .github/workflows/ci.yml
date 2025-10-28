@@ -11,21 +11,22 @@ on:
       - master
     types:
       - opened
+
 jobs:
   build:
     runs-on: test
     steps:
-      - name: checkout
-        uses: actions/checkout@v5.0.0
-      - name: build docker
-        working-directory: ${{ github.workspace }}
-        run: sudo docker build --progress=plain --no-cache -t dags:latest .
+      - uses: actions/checkout@v5
+      - name: Build Docker
+        run: sudo docker build --progress=plain --no-cache -t dags:latest ${{ github.workspace }}
+
   test:
     needs: build
     runs-on: test
     steps:
-      - name: test
-        run: sudo docker run dags:latest --name test_dags
+      - name: Run tests
+        run: sudo docker run --rm dags:latest
+
   cleanup:
     needs:
       - build
@@ -33,7 +34,7 @@ jobs:
     runs-on: test
     if: always()
     steps:
-      - name: cleanup
-        run: sudo docker rm dags/test \
-             sudo docker rmi dags:latest
-
+      - name: Cleanup
+        run: |
+          sudo docker rm -f test_dags || true
+          sudo docker rmi dags:latest || true
