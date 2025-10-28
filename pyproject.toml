@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "graduate_work"
+version = "0.1.0"
+description = ""
+authors = ["Alexander Chikov <github.com/alexchikov>"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+apache-airflow = "^2.10.4"
+requests = "2.32.5"
+python-telegram-bot = "^22.5"
+pytest = "^8.4.2"
+Flask-Limiter = "<3.5.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
