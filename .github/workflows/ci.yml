@@ -25,7 +25,7 @@ jobs:
     runs-on: test
     steps:
       - name: test
-        run: docker run dags:latest --name test_dags
+        run: sudo docker run dags:latest --name test_dags
   cleanup:
     needs:
       - build
@@ -34,6 +34,6 @@ jobs:
     if: always()
     steps:
       - name: cleanup
-        run: docker rm dags/test \
-             docker rmi dags:latest
+        run: sudo docker rm dags/test \
+             sudo docker rmi dags:latest
 
