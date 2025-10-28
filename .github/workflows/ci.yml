@@ -1,0 +1,40 @@
+name: CI
+on:
+  push:
+    branches:
+      - feature/*
+      - fix/*
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+
+jobs:
+  build:
+    runs-on: test
+    steps:
+      - uses: actions/checkout@v5
+      - name: list files
+        run: ls -la $GITHUB_WORKSPACE
+      - name: Build Docker
+        run: sudo docker build --progress=plain --no-cache -t dags:latest .
+
+  test:
+    needs: build
+    runs-on: test
+    steps:
+      - name: Run tests
+        run: sudo docker run --rm dags:latest
+
+  cleanup:
+    needs:
+      - build
+      - test
+    runs-on: test
+    if: always()
+    steps:
+      - name: Cleanup
+        run: |
+          sudo docker rm -f test_dags || true
+          sudo docker rmi dags:latest || true
