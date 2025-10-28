@@ -2,7 +2,7 @@ FROM python:3.10.14-slim
 
 WORKDIR /app
 
-COPY . /app
+COPY . .
 
 RUN printf "TOKEN: \"1111\"\nCHAT_ID: \"1111\"\n" > config.yaml
 
