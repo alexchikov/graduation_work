@@ -18,7 +18,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v5.0.0
       - name: build docker
-        run: docker build --progress=plain --no-cache -t dags:latest .
+        run: sudo docker build --progress=plain --no-cache -t dags:latest .
   test:
     needs: build
     runs-on: test
