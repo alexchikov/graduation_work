@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+    branches:
+      - *
+  pull_request:
+    branches:
+      - feature/*
+      - master
+    types:
+      - opened
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: checkout
+        uses: actions/checkout@v5.0.0
+      - name: build docker
+        run: docker build
+  test:
+    runs-on: self-hosted
+    steps:
+      - name: test
+        run: docker run
+  cleanup:
+    runs-on: self-hosted
+    if: always()
+    steps:
+      - name: cleanup
+        run: docker rm
+
