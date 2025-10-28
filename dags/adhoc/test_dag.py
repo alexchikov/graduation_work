@@ -13,6 +13,9 @@ default_args = {'retries': 5,
                 'retry_delay': datetime.timedelta(minutes=5),
                 'owner': 'alexchikov'}
 
+def hello_world():
+    print("Hello World")
+
 with DAG(dag_id='test_dag',
          description='This is my test DAG',
          schedule='30 22 * * *',
@@ -20,8 +23,7 @@ with DAG(dag_id='test_dag',
          catchup=False,
          start_date=datetime.datetime(2024, 7, 15)) as dag:
     task1 = PythonOperator(task_id='python_func',
-                           python_callable=print,
-                           op_args=["Hello World"],
+                           python_callable=hello_world,
                            on_success_callback=TelegramNotifier('Yeeah!',
                                                                 cfg.get('TOKEN'),
                                                                 cfg.get('CHAT_ID')),
