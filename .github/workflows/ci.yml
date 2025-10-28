@@ -11,17 +11,17 @@ on:
       - opened
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: test-runner
     steps:
       - name: checkout
         uses: actions/checkout@v5.0.0
       - name: build docker
-        run: docker build
+        run: docker build -t . --progress=plain --no-cache --tag=dags:latest
   test:
-    runs-on: self-hosted
+    runs-on: test-runner
     steps:
       - name: test
-        run: docker run
+        run: docker run dags:latest --name test_dags
   cleanup:
     runs-on: self-hosted
     if: always()
