@@ -18,14 +18,14 @@ jobs:
       - name: list files
         run: ls -la $GITHUB_WORKSPACE
       - name: Build Docker
-        run: sudo docker build --progress=plain --no-cache -t dags:latest .
+        run: docker build --progress=plain --no-cache -t dags:latest .
 
   test:
     needs: build
     runs-on: test
     steps:
       - name: Run tests
-        run: sudo docker run --rm dags:latest
+        run: docker run --rm dags:latest
 
   cleanup:
     needs:
@@ -36,5 +36,5 @@ jobs:
     steps:
       - name: Cleanup
         run: |
-          sudo docker rm -f test_dags || true
-          sudo docker rmi dags:latest || true
+          docker rm -f test_dags || true
+          docker rmi dags:latest || true
