@@ -2,7 +2,16 @@ FROM python:3.10.14-slim
 
 WORKDIR /app
 
-COPY . .
+COPY pyproject.toml /app/
+
+RUN apt-get update && \
+    apt-get install -y python3-virtualenv python3-poetry && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN poetry config virtualenvs.create false
+RUN poetry install --no-interaction --no-ansi
+
+COPY . /app
 
 RUN printf "TOKEN: \"1111\"\nCHAT_ID: \"1111\"\n" > config.yaml
 
@@ -12,13 +21,6 @@ ENV AIRFLOW__DATABASE__SQL_ALCHEMY_CONN="sqlite:////tmp/airflow_test.db"
 ENV AIRFLOW__CORE__DAGS_FOLDER="/app/dags"
 ENV AIRFLOW__CORE__LOAD_EXAMPLES="False"
 ENV AIRFLOW__LOGGING__LOGGING_LEVEL="ERROR"
-
-RUN apt-get update && \
-    apt-get install -y python3-virtualenv python3-poetry && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN poetry config virtualenvs.create false
-RUN poetry install --no-interaction --no-ansi
 
 RUN echo '\
 import os\n\
