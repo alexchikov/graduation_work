@@ -6,8 +6,6 @@ on:
       - fix/*
   pull_request:
     branches:
-      - feature/*
-      - fix/*
       - master
     types:
       - opened
