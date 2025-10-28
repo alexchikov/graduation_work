@@ -20,14 +20,19 @@ jobs:
       - name: build docker
         run: docker build -t . --progress=plain --no-cache --tag=dags:latest
   test:
+    needs: build
     runs-on: test-runner
     steps:
       - name: test
         run: docker run dags:latest --name test_dags
   cleanup:
+    needs:
+      - build
+      - test
     runs-on: self-hosted
     if: always()
     steps:
       - name: cleanup
-        run: docker rm
+        run: docker rm dags/test \
+             docker rmi dags:latest
 
