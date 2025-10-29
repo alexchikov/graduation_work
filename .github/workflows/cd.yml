@@ -3,8 +3,17 @@ on:
   push:
     branches:
       - master
+
 jobs:
-  build:
+  deploy:
     runs-on: prod
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Deploy DAGs
+        run: |
+          echo "Updating DAGs on production..."
+          cd ${{ github.workspace }}
+          cp -r dags /home/airflow/
+          cp -r dags/utils /home/airflow/
