@@ -25,7 +25,7 @@ s3 = create_s3()
 
 
 def create_s3_task(**context):
-    filename = f"moex__securities.json"
+    filename = f"{SOURCE}__securities.json"
     dest_url = f"raw/history/securities/{SOURCE}/{filename}"
     context['ti'].xcom_push(key='s3_params', value={
         "bucket": cfg.get("AWS_BUCKET"),
@@ -56,7 +56,7 @@ with DAG(
         default_args=DEFAULT_ARGS,
         schedule="@daily",
         catchup=False,
-        tags=["moex", "el", "securities"],
+        tags=[SOURCE, "el", "securities"],
         on_failure_callback=TelegramNotifier(
             message='dag failed!',
             bot_token=cfg.get("TOKEN"),

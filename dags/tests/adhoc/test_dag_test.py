@@ -14,7 +14,6 @@ def dagbag():
     return DagBag()
 
 def test_dag_loaded(dagbag):
-    dag = dagbag.get_dag(dag_id="test_dag")
     assert dagbag.import_errors == {}
 
 def test_dag_is_not_none(dagbag):

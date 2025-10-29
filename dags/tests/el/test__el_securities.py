@@ -18,9 +18,7 @@ def dagbag():
 
 
 def test_dag_loaded(dagbag):
-    for src in SOURCES:
-        dag = dagbag.get_dag(dag_id=f"el__{src}_securities")
-        assert dagbag.import_errors == {}
+    assert dagbag.import_errors == {}
 
 
 def test_dag_is_not_none(dagbag):
