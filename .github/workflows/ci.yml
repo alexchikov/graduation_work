@@ -27,10 +27,17 @@ jobs:
       - name: Run tests
         run: docker run --rm dags:latest
 
+  code_quality:
+    needs: test
+    runs-on: test
+    steps:
+      - name: install dependencies
+        run: poetry install --no-root
+      - name: check code quality
+        run: poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
   cleanup:
-    needs:
-      - build
-      - test
+    needs: test
     runs-on: test
     if: always()
     steps:

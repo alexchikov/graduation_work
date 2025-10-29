@@ -15,6 +15,7 @@ python-telegram-bot = "^22.5"
 pytest = "^8.4.2"
 Flask-Limiter = "<3.5.0"
 psycopg2-binary="2.9.11"
+flake8="^7.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
