@@ -15,7 +15,9 @@ class TelegramNotifier(BaseNotifier):
         self._bot = Bot(token=self._token)
 
     async def send_message(self, message: str) -> None:
-        await self._bot.send_message(self._chat_id, text="".join(message), parse_mode='html')
+        await self._bot.send_message(self._chat_id,
+                                     text="".join(message),
+                                     parse_mode='html')
 
     def notify(self, context: Context) -> None:
         dag_id = context['ti'].dag_id

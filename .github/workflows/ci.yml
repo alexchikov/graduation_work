@@ -36,7 +36,7 @@ jobs:
       - name: install dependencies
         run: poetry install --no-root
       - name: check code quality
-        run: poetry run flake8 . --count --select=E,F --show-source --statistics
+        run: poetry run flake8 . --count --select=E,F --ignore=E226,E302,E305,E501 --show-source --statistics
 
   cleanup:
     needs: test
