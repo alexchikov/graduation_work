@@ -6,7 +6,6 @@ from dags.utils.notifiers.tg import TelegramNotifier
 from dags.utils.cfg.configs import Config as cfg
 from dags.utils.securities import create_s3, load_data
 
-
 DAG_ID = "el__agro_securities"
 START = datetime(2025, 10, 28, 0, 0, 0)
 DESCRIPTION = "DAG for ETL processing AGRO securities"
@@ -43,7 +42,7 @@ def load_data_task(**context):
 
     s3 = create_s3()
     load_data(
-        url=cfg.get('URL_SECURITIES')+f"{SOURCE.upper()}.json",
+        url=cfg.get('URL_SECURITIES') + f"{SOURCE.upper()}.json",
         bucket=s3_params["bucket"],
         key=s3_params["key"],
         s3=s3
@@ -51,20 +50,19 @@ def load_data_task(**context):
 
 
 with DAG(
-    dag_id=DAG_ID,
-    start_date=START,
-    description=DESCRIPTION,
-    default_args=DEFAULT_ARGS,
-    schedule="@daily",
-    catchup=False,
-    tags=[SOURCE, "el", "securities"],
-    on_failure_callback=TelegramNotifier(
-        message='dag failed!',
-        bot_token=cfg.get("TOKEN"),
-        chat_id=cfg.get("CHAT_ID")
-    ),
+        dag_id=DAG_ID,
+        start_date=START,
+        description=DESCRIPTION,
+        default_args=DEFAULT_ARGS,
+        schedule="@daily",
+        catchup=False,
+        tags=[SOURCE, "el", "securities"],
+        on_failure_callback=TelegramNotifier(
+            message='dag failed!',
+            bot_token=cfg.get("TOKEN"),
+            chat_id=cfg.get("CHAT_ID")
+        ),
 ) as dag:
-
     start = BashOperator(
         task_id='start',
         bash_command=f"echo start $(pwd) {CURRENT_DATE}"

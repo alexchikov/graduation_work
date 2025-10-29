@@ -5,7 +5,6 @@ from dags.utils.notifiers.tg import TelegramNotifier
 from dags.utils.cfg.configs import Config as cfg
 import datetime
 
-
 default_args = {'retries': 5,
                 'email_on_failure': False,
                 'email_on_success': False,
@@ -13,8 +12,10 @@ default_args = {'retries': 5,
                 'retry_delay': datetime.timedelta(minutes=5),
                 'owner': 'alexchikov'}
 
+
 def hello_world():
     print("Hello World")
+
 
 with DAG(dag_id='test_dag',
          description='This is my test DAG',

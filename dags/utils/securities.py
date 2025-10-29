@@ -14,6 +14,7 @@ def create_s3():
     )
     return s3
 
+
 def load_data(url: str, bucket: str, key: str, s3: BaseClient):
     config = TransferConfig(multipart_threshold=50 * 1024 * 1024)
 
