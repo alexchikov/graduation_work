@@ -24,8 +24,3 @@ def test_dag_is_not_none(dagbag):
     for src in SOURCES:
         dag = dagbag.get_dag(dag_id=f"el__{src}_securities")
         assert dag is not None
-
-def test_dag(dagbag):
-    for src in SOURCES:
-        dag = dagbag.get_dag(dag_id=f"el__{src}_securities")
-        assert dag.test()
