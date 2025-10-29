@@ -15,6 +15,7 @@ jobs:
         run: |
           cd /home/airflow
           poetry install --no-root
+          
       - name: Deploy DAGs
         run: |
           echo "Updating DAGs on production..."
