@@ -11,6 +11,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v5
 
+      - name: install dependencies
+        run: poetry install --no-root
+
       - name: Deploy DAGs
         run: |
           echo "Updating DAGs on production..."
