@@ -8,7 +8,7 @@ from dags.utils.securities import create_s3, load_data
 
 
 DAG_ID = "el__moex_securities"
-START = datetime(2013, 1, 1, 0, 0, 0)
+START = datetime(2025, 10, 28, 0, 0, 0)
 DESCRIPTION = "DAG for ETL processing MOEX securities"
 
 DEFAULT_ARGS = {
@@ -21,12 +21,12 @@ DEFAULT_ARGS = {
 }
 
 CURRENT_DATE = "{{ execution_date.strftime('%Y-%m-%d') }}"
-FILENAME = f"moex_security_{CURRENT_DATE.replace('-', '')}.json"
-DEST_URL = f"raw/history/securities/{FILENAME}"
 
 
 def create_s3_task(**context):
     s3 = create_s3()
+    FILENAME = f"moex_security_{CURRENT_DATE.replace('-', '')}.json"
+    DEST_URL = f"raw/history/securities/{FILENAME}"
     context['ti'].xcom_push(key='s3_params', value={
         "bucket": cfg.get("AWS_BUCKET"),
         "key": DEST_URL
@@ -55,7 +55,7 @@ with DAG(
     description=DESCRIPTION,
     default_args=DEFAULT_ARGS,
     schedule="@daily",
-    catchup=True,
+    catchup=False,
     tags=["moex", "el"],
     on_failure_callback=TelegramNotifier(
         message='dag failed!',
