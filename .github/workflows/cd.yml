@@ -13,8 +13,9 @@ jobs:
 
       - name: install dependencies
         run: |
-          cd /home/airflow
+          cd ${{ github.workspace }}
           poetry install --no-root
+          poetry run pip install boto3 botocore
           
       - name: Deploy DAGs
         run: |
