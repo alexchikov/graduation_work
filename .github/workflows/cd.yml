@@ -13,8 +13,8 @@ jobs:
 
       - name: install dependencies
         run: |
-          cd /home/airflow
-          /home/airflow/.local/bin/poetry install --no-root
+          cd ~
+          ~/.local/bin/poetry install --no-root
           
       - name: Deploy DAGs
         run: |
