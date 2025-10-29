@@ -16,6 +16,8 @@ pytest = "^8.4.2"
 Flask-Limiter = "<3.5.0"
 psycopg2-binary="2.9.11"
 flake8="^7.0.0"
+apache-airflow-providers-apache-spark = "^5.3.3"
+boto3 = "^1.40.61"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
