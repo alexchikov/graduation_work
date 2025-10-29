@@ -12,8 +12,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: install dependencies
-        run: poetry install --no-root
-
+        run: |
+          cd /home/airflow
+          poetry install --no-root
       - name: Deploy DAGs
         run: |
           echo "Updating DAGs on production..."
