@@ -20,6 +20,7 @@ with DAG(dag_id='test_dag',
          description='This is my test DAG',
          schedule='30 22 * * *',
          default_args=default_args,
+         tags=["adhoc", "test"],
          catchup=False,
          start_date=datetime.datetime(2024, 7, 15)) as dag:
     task1 = PythonOperator(task_id='python_func',
