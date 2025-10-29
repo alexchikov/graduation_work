@@ -7,6 +7,10 @@ on:
       - opened
       - reopened
       - synchronize
+  push:
+    branches:
+      - feature/*
+      - fix/*
 
 jobs:
   build:

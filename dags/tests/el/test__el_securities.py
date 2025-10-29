@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 
 
-DAG_ID = "el__moex_securities"
+SOURCES = ["imoex", "rtsi", "mmix", "agro", "inav"]
 
 @pytest.fixture(autouse=True)
 def mock_telegram_bot():
@@ -16,13 +16,16 @@ def dagbag():
     return DagBag()
 
 def test_dag_loaded(dagbag):
-    dag = dagbag.get_dag(dag_id=DAG_ID)
-    assert dagbag.import_errors == {}
+    for src in SOURCES:
+        dag = dagbag.get_dag(dag_id=f"el__{src}_securities")
+        assert dagbag.import_errors == {}
 
 def test_dag_is_not_none(dagbag):
-    dag = dagbag.get_dag(dag_id=DAG_ID)
-    assert dag is not None
+    for src in SOURCES:
+        dag = dagbag.get_dag(dag_id=f"el__{src}_securities")
+        assert dag is not None
 
 def test_dag(dagbag):
-    dag = dagbag.get_dag(dag_id=DAG_ID)
-    assert dag.test()
+    for src in SOURCES:
+        dag = dagbag.get_dag(dag_id=f"el__{src}_securities")
+        assert dag.test()

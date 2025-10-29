@@ -7,9 +7,9 @@ from dags.utils.cfg.configs import Config as cfg
 from dags.utils.securities import create_s3, load_data
 
 
-DAG_ID = "el__moex_securities"
+DAG_ID = "el__agro_securities"
 START = datetime(2025, 10, 28, 0, 0, 0)
-DESCRIPTION = "DAG for ETL processing MOEX securities"
+DESCRIPTION = "DAG for ETL processing AGRO securities"
 
 DEFAULT_ARGS = {
     "owner": "alexc",
@@ -21,15 +21,16 @@ DEFAULT_ARGS = {
 }
 
 CURRENT_DATE = "{{ execution_date.strftime('%Y-%m-%d') }}"
+SOURCE = "agro"
+s3 = create_s3()
 
 
 def create_s3_task(**context):
-    s3 = create_s3()
-    FILENAME = f"moex_security_{CURRENT_DATE.replace('-', '')}.json"
-    DEST_URL = f"raw/history/securities/{FILENAME}"
+    filename = f"{SOURCE}__securities.json"
+    dest_url = f"raw/history/securities/{SOURCE}/{filename}"
     context['ti'].xcom_push(key='s3_params', value={
         "bucket": cfg.get("AWS_BUCKET"),
-        "key": DEST_URL
+        "key": dest_url
     })
     return "S3 client created"
 
@@ -38,11 +39,11 @@ def load_data_task(**context):
     ti = context['ti']
     s3_params = ti.xcom_pull(task_ids='create_s3', key='s3_params')
     if not s3_params:
-        raise ValueError("Не удалось получить параметры S3 из XCom")
+        raise ValueError("Cannot get S3 parameters from XCom")
 
     s3 = create_s3()
     load_data(
-        url=cfg.get('URL_MOEX_SECURITIES'),
+        url=cfg.get('URL_SECURITIES')+f"{SOURCE.upper()}.json",
         bucket=s3_params["bucket"],
         key=s3_params["key"],
         s3=s3
@@ -56,7 +57,7 @@ with DAG(
     default_args=DEFAULT_ARGS,
     schedule="@daily",
     catchup=False,
-    tags=["moex", "el"],
+    tags=[SOURCE, "el", "securities"],
     on_failure_callback=TelegramNotifier(
         message='dag failed!',
         bot_token=cfg.get("TOKEN"),
