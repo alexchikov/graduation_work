@@ -11,15 +11,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v5
 
+      - name: Deploy DAGs
+        run: |
+          cd /home/airflow
+          cp ${{ github.workspace }}/pyproject.toml /home/airflow/
+          cp -r ${{ github.workspace }}/dags /home/airflow/
+
       - name: install dependencies
         run: |
           cd /home/airflow
           /home/airflow/.local/bin/poetry lock
           /home/airflow/.local/bin/poetry install --no-root
-          
-      - name: Deploy DAGs
-        run: |
-          echo "Updating DAGs on production..."
-          cd ${{ github.workspace }}
-          cp -r dags /home/airflow/
-          cp -r dags/utils /home/airflow/
