@@ -13,9 +13,8 @@ jobs:
 
       - name: install dependencies
         run: |
-          cd ${{ github.workspace }}
-          poetry install --no-root
-          poetry run pip install boto3 botocore
+          cd ~
+          ~/.local/bin/poetry install --no-root
           
       - name: Deploy DAGs
         run: |
