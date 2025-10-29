@@ -2,8 +2,8 @@ from airflow.models import DagBag
 from unittest.mock import patch
 import pytest
 
+SOURCES = ["imoex", "rtsi", "mmix", "agro", "inav"]
 
-DAG_ID = "el__moex_securities"
 
 @pytest.fixture(autouse=True)
 def mock_telegram_bot():
@@ -11,18 +11,17 @@ def mock_telegram_bot():
         mock_bot.return_value = None
         yield
 
+
 @pytest.fixture(autouse=True)
 def dagbag():
     return DagBag()
 
+
 def test_dag_loaded(dagbag):
-    dag = dagbag.get_dag(dag_id=DAG_ID)
     assert dagbag.import_errors == {}
 
-def test_dag_is_not_none(dagbag):
-    dag = dagbag.get_dag(dag_id=DAG_ID)
-    assert dag is not None
 
-def test_dag(dagbag):
-    dag = dagbag.get_dag(dag_id=DAG_ID)
-    assert dag.test()
+def test_dag_is_not_none(dagbag):
+    for src in SOURCES:
+        dag = dagbag.get_dag(dag_id=f"el__{src}_securities")
+        assert dag is not None

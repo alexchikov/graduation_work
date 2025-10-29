@@ -7,6 +7,10 @@ on:
       - opened
       - reopened
       - synchronize
+  push:
+    branches:
+      - feature/*
+      - fix/*
 
 jobs:
   build:
@@ -32,7 +36,7 @@ jobs:
       - name: install dependencies
         run: poetry install --no-root
       - name: check code quality
-        run: poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        run: poetry run flake8 . --count --select=E,F --ignore=E226,E302,E305,E501 --show-source --statistics
 
   cleanup:
     needs: test

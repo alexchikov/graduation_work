@@ -13,7 +13,7 @@ RUN poetry install --no-interaction --no-ansi
 
 COPY . /app
 
-RUN printf "TOKEN: \"1111\"\nCHAT_ID: \"1111\"\n" > config.yaml
+RUN cat config.template > config.yaml
 
 ENV CONFIG_PATH="/app/config.yaml"
 ENV AIRFLOW_HOME="/app"
