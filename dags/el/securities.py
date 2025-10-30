@@ -2,13 +2,20 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 from datetime import datetime, timedelta
-import requests
-import json
-import io
 from dags.utils.cfg.configs import Config as cfg
 from dags.utils.notifiers.tg import TelegramNotifier
 from dags.utils.securities import create_s3
+import sys
+import requests
+import json
+import io
+import logging
 
+logging.basicConfig(
+    stream=sys.stderr,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.INFO
+)
 DAG_ID = "el__securities_list"
 START = datetime(2025, 10, 28, 0, 0, 0)
 DESCRIPTION = "DAG for loading full list of traded securities from MOEX with pagination"
@@ -33,6 +40,7 @@ def load_securities_to_s3(**context):
 
     start_index = 0
     while True:
+        logging.info(f"extracting {start_index//100} page")
         params = {
             "is_trading": "1",
             "lang": "ru",
