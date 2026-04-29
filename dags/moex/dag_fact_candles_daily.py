@@ -21,18 +21,18 @@ URL_TMPL = (
 )
 def moex_fact_candles_daily() -> None:
     @task
-    def load_for_secid(secid: str, logical_date: str) -> str:
+    def load_for_secid(secid: str, run_date: str) -> str:
         days = int(cfg("MOEX_CANDLES_LOOKBACK_DAYS", "30"))
-        date_to = datetime.strptime(logical_date, "%Y-%m-%d")
+        date_to = datetime.strptime(run_date, "%Y-%m-%d")
         date_from = (date_to - timedelta(days=days)).strftime("%Y-%m-%d")
 
         payload = http_json(
             URL_TMPL.format(secid=secid),
-            params={"from": date_from, "till": logical_date, "interval": 24},
+            params={"from": date_from, "till": run_date, "interval": 24},
         )
         ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
         key = (
-            f"raw/moex/candles/secid={secid}/date={logical_date}/"
+            f"raw/moex/candles/secid={secid}/date={run_date}/"
             f"payload_{ts}.json"
         )
         return put_json_to_s3(key, payload)
@@ -46,4 +46,4 @@ def moex_fact_candles_daily() -> None:
         )
 
 
-moex_fact_candles_daily()
+MOEX_FACT_CANDLES_DAILY_DAG = moex_fact_candles_daily()

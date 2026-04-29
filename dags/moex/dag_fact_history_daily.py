@@ -27,11 +27,11 @@ URLS = {
 )
 def moex_fact_history_daily() -> None:
     @task
-    def load_market(market: str, logical_date: str) -> str:
-        payload = http_json(URLS[market], params={"date": logical_date})
+    def load_market(market: str, run_date: str) -> str:
+        payload = http_json(URLS[market], params={"date": run_date})
         ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
         key = (
-            f"raw/moex/history/{market}/date={logical_date}/"
+            f"raw/moex/history/{market}/date={run_date}/"
             f"payload_{ts}.json"
         )
         return put_json_to_s3(key, payload)
@@ -40,4 +40,4 @@ def moex_fact_history_daily() -> None:
     load_market.override(task_id="load_history_bonds")("bonds", "{{ ds }}")
 
 
-moex_fact_history_daily()
+MOEX_FACT_HISTORY_DAILY_DAG = moex_fact_history_daily()

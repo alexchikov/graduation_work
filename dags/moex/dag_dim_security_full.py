@@ -16,13 +16,13 @@ from dags.moex.common import http_json, put_json_to_s3
 )
 def moex_dim_security_full() -> None:
     @task
-    def load(logical_date: str) -> str:
+    def load(run_date: str) -> str:
         payload = http_json("https://iss.moex.com/iss/securities.json")
         ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-        key = f"raw/moex/securities_full/dt={logical_date}/payload_{ts}.json"
+        key = f"raw/moex/securities_full/dt={run_date}/payload_{ts}.json"
         return put_json_to_s3(key, payload)
 
     load("{{ ds }}")
 
 
-moex_dim_security_full()
+MOEX_DIM_SECURITY_FULL_DAG = moex_dim_security_full()

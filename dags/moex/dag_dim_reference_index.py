@@ -16,13 +16,13 @@ from dags.moex.common import http_json, put_json_to_s3
 )
 def moex_dim_reference_index() -> None:
     @task
-    def load(logical_date: str) -> str:
+    def load(run_date: str) -> str:
         payload = http_json("https://iss.moex.com/iss/index.json")
         ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-        key = f"raw/moex/index/dt={logical_date}/payload_{ts}.json"
+        key = f"raw/moex/index/dt={run_date}/payload_{ts}.json"
         return put_json_to_s3(key, payload)
 
     load("{{ ds }}")
 
 
-moex_dim_reference_index()
+MOEX_DIM_REFERENCE_INDEX_DAG = moex_dim_reference_index()

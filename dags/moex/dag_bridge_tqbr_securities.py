@@ -21,13 +21,13 @@ URL = (
 )
 def moex_bridge_tqbr_securities() -> None:
     @task
-    def load(logical_date: str) -> str:
+    def load(run_date: str) -> str:
         payload = http_json(URL)
         ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-        key = f"raw/moex/tqbr_securities/dt={logical_date}/payload_{ts}.json"
+        key = f"raw/moex/tqbr_securities/dt={run_date}/payload_{ts}.json"
         return put_json_to_s3(key, payload)
 
     load("{{ ds }}")
 
 
-moex_bridge_tqbr_securities()
+MOEX_BRIDGE_TQBR_SECURITIES_DAG = moex_bridge_tqbr_securities()
