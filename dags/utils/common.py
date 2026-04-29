@@ -58,14 +58,13 @@ def bucket() -> str:
 def s3_client() -> Any:
     access_key = cfg("AWS_ACCESS_KEY")
     secret_key = cfg("AWS_SECRET_KEY")
-    region = cfg("AWS_REGION", "eu-central-1")
     if not access_key or not secret_key:
         raise AirflowFailException("AWS credentials are required")
     return boto3.client(
         "s3",
+        endpoint_url='https://storage.yandexcloud.net',
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
-        region_name=region,
     )
 
 
