@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from typing import Any
 
 import boto3
@@ -12,6 +13,23 @@ from airflow.exceptions import AirflowFailException
 from airflow.models import Variable
 
 REQUEST_TIMEOUT_SEC = 30
+CONFIG_FILE_NAME = "config.yaml"
+
+
+def _load_local_config() -> dict[str, str]:
+    config_path = Path(__file__).resolve().parents[2] / CONFIG_FILE_NAME
+    if not config_path.exists():
+        return {}
+
+    values: dict[str, str] = {}
+    for raw_line in config_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        normalized = value.strip().strip("'").strip('"')
+        values[key.strip()] = normalized
+    return values
 
 
 def cfg(name: str, default: str | None = None) -> str | None:
@@ -24,6 +42,9 @@ def cfg(name: str, default: str | None = None) -> str | None:
             return value
     except Exception:
         pass
+    file_value = _load_local_config().get(name)
+    if file_value:
+        return file_value
     return default
 
 

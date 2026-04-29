@@ -5,6 +5,7 @@ from dags.moex.dag_dim_reference_index import MOEX_DIM_REFERENCE_INDEX_DAG
 from dags.moex.dag_dim_security_full import MOEX_DIM_SECURITY_FULL_DAG
 from dags.moex.dag_fact_candles_daily import MOEX_FACT_CANDLES_DAILY_DAG
 from dags.moex.dag_fact_history_daily import MOEX_FACT_HISTORY_DAILY_DAG
+from dags.moex import common
 
 
 def test_dim_reference_index_dag():
@@ -36,3 +37,13 @@ def test_fact_candles_daily_dag_has_default_secids():
     assert "load_candles_SBER" in MOEX_FACT_CANDLES_DAILY_DAG.task_ids
     assert "load_candles_GAZP" in MOEX_FACT_CANDLES_DAILY_DAG.task_ids
     assert "load_candles_LKOH" in MOEX_FACT_CANDLES_DAILY_DAG.task_ids
+
+
+def test_cfg_reads_local_config_fallback(monkeypatch):
+    monkeypatch.delenv("AWS_ACCESS_KEY", raising=False)
+    monkeypatch.setattr(
+        common,
+        "_load_local_config",
+        lambda: {"AWS_ACCESS_KEY": "x"},
+    )
+    assert common.cfg("AWS_ACCESS_KEY") == "x"
