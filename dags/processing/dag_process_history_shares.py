@@ -31,6 +31,11 @@ with DAG(
             "--bucket", "{{ var.value.AWS_BUCKET }}",
             "--warehouse", "{{ var.value.ICEBERG_WAREHOUSE }}",
         ],
+        packages=(
+            "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2,"
+            "org.apache.hadoop:hadoop-aws:3.3.4,"
+            "com.amazonaws:aws-java-sdk-bundle:1.12.262"
+        ),
         conf={
             "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
             "spark.hadoop.fs.s3a.access.key": "{{ var.value.AWS_ACCESS_KEY }}",
@@ -56,6 +61,11 @@ with DAG(
             "--table", "processed.moex_fact_stock_daily",
             "--warehouse", "{{ var.value.ICEBERG_WAREHOUSE }}",
         ],
+        packages=(
+            "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2,"
+            "org.apache.hadoop:hadoop-aws:3.3.4,"
+            "com.amazonaws:aws-java-sdk-bundle:1.12.262"
+        ),
         conf={
             "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
             "spark.hadoop.fs.s3a.access.key": "{{ var.value.AWS_ACCESS_KEY }}",

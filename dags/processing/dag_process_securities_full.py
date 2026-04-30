@@ -42,6 +42,11 @@ with DAG(
                 "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider"
             ),
         },
+        packages=(
+            "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2,"
+            "org.apache.hadoop:hadoop-aws:3.3.4,"
+            "com.amazonaws:aws-java-sdk-bundle:1.12.262"
+        ),
         env_vars={
             "AWS_ACCESS_KEY_ID": "{{ var.value.AWS_ACCESS_KEY }}",
             "AWS_SECRET_KEY_ID": "{{ var.value.AWS_SECRET_KEY }}",
@@ -67,6 +72,11 @@ with DAG(
                 "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider"
             ),
         },
+        packages=(
+            "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2,"
+            "org.apache.hadoop:hadoop-aws:3.3.4,"
+            "com.amazonaws:aws-java-sdk-bundle:1.12.262"
+        ),
         env_vars={
             "AWS_ACCESS_KEY_ID": "{{ var.value.AWS_ACCESS_KEY }}",
             "AWS_SECRET_KEY_ID": "{{ var.value.AWS_SECRET_KEY }}",
