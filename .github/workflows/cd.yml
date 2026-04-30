@@ -27,5 +27,5 @@ jobs:
 
       - name: Restart Airflow
         run: |
-          sudo systemctl restart airflow-webserver
-          sudo systemctl restart airflow-scheduler
+          sudo -n /usr/bin/systemctl restart airflow-webserver
+          sudo -n /usr/bin/systemctl restart airflow-scheduler
