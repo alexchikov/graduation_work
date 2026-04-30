@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from airflow.decorators import dag, task
 
-from dags.moex.common import cfg, http_json, put_json_to_s3
+from dags.utils.moex.common import cfg, http_json, put_json_to_s3
 
 URL_TMPL = (
     "https://iss.moex.com/iss/engines/stock/markets/shares/boards/"
