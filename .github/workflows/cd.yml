@@ -1,4 +1,5 @@
 name: CD
+
 on:
   push:
     branches:
@@ -7,18 +8,34 @@ on:
 jobs:
   deploy:
     runs-on: prod
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v5
 
-      - name: Deploy DAGs
+      - name: Deploy project files
         run: |
           cd /home/airflow
-          cp ${{ github.workspace }}/pyproject.toml /home/airflow/
-          cp -r ${{ github.workspace }}/dags /home/airflow/
 
-      - name: install dependencies
+          cp ${{ github.workspace }}/pyproject.toml /home/airflow/
+
+          if [ -f "${{ github.workspace }}/poetry.lock" ]; then
+            cp ${{ github.workspace }}/poetry.lock /home/airflow/
+          fi
+
+          rsync -a --delete ${{ github.workspace }}/dags/ /home/airflow/dags/
+
+      - name: Install dependencies
         run: |
           cd /home/airflow
-          /home/airflow/.local/bin/poetry lock
+
           /home/airflow/.local/bin/poetry install --no-root
+
+          /home/airflow/.local/bin/poetry run python -c "from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor; print('Amazon provider OK')"
+
+          /home/airflow/.local/bin/poetry run airflow providers list | grep amazon
+
+      - name: Restart Airflow
+        run: |
+          sudo systemctl restart airflow-webserver
+          sudo systemctl restart airflow-scheduler
