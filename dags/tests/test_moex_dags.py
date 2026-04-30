@@ -1,11 +1,11 @@
-from dags.moex.dag_bridge_tqbr_securities import (
+from dags.dag_bridge_tqbr_securities import (
     MOEX_BRIDGE_TQBR_SECURITIES_DAG,
 )
-from dags.moex.dag_dim_reference_index import MOEX_DIM_REFERENCE_INDEX_DAG
-from dags.moex.dag_dim_security_full import MOEX_DIM_SECURITY_FULL_DAG
-from dags.moex.dag_fact_candles_daily import MOEX_FACT_CANDLES_DAILY_DAG
-from dags.moex.dag_fact_history_daily import MOEX_FACT_HISTORY_DAILY_DAG
-from dags.utils.moex import common
+from dags.dag_dim_reference_index import MOEX_DIM_REFERENCE_INDEX_DAG
+from dags.dag_dim_security_full import MOEX_DIM_SECURITY_FULL_DAG
+from dags.dag_fact_candles_daily import MOEX_FACT_CANDLES_DAILY_DAG
+from dags.dag_fact_history_daily import MOEX_FACT_HISTORY_DAILY_DAG
+from dags.utils import common
 
 
 def test_dim_reference_index_dag():
