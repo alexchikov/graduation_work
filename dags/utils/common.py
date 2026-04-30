@@ -79,6 +79,12 @@ def _coerce_value(value: Any, spark_type: Any) -> Any:
     if value is None:
         return None
 
+    if isinstance(value, str):
+        cleaned = value.strip()
+        if cleaned in {"", "0000-00-00", "0000-00-00 00:00:00", "0000-00-00T00:00:00"}:
+            return None
+        value = cleaned
+
     if isinstance(spark_type, StringType):
         return str(value)
     if isinstance(spark_type, DoubleType):
@@ -102,11 +108,17 @@ def _coerce_value(value: Any, spark_type: Any) -> Any:
             return value
         if isinstance(value, datetime):
             return value.date()
-        return date.fromisoformat(str(value))
+        try:
+            return date.fromisoformat(str(value))
+        except ValueError:
+            return None
     if isinstance(spark_type, TimestampType):
         if isinstance(value, datetime):
             return value
-        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        try:
+            return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        except ValueError:
+            return None
     return value
 
 
