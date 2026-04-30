@@ -64,7 +64,7 @@ def load_raw_df(spark: SparkSession, cfg: AppConfig, bucket: str, run_date: str)
         "s3",
         aws_access_key_id=os.getenv("AWS_ACCESS_KEY"),
         aws_secret_access_key=os.getenv("AWS_SECRET_KEY"),
-        region_name=os.getenv("AWS_REGION", "eu-central-1"),
+        endpoint_url='https://storage.yandexcloud.net'
     )
 
     rows: list[dict[str, Any]] = []

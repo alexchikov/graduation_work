@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 
-from dags.apps.common_processing import AppConfig, build_spark, load_raw_df, write_iceberg
+from dags.utils.common_processing import AppConfig, build_spark, load_raw_df, write_iceberg
 
 APP_CONFIG = AppConfig(raw_prefix="raw/moex/candles", payload_block="candles", table_name="processed.moex_fact_security_candles")
 
