@@ -21,7 +21,7 @@ def main() -> None:
 
     cfg = APP_CONFIG
     spark = build_spark(app_name=cfg.table_name, warehouse=args.warehouse)
-    df = load_raw_df(spark=spark, cfg=cfg, bucket=args.bucket, run_date=args.run_date)
+    df = load_raw_df(spark=spark, app_cfg=cfg, bucket_name=args.bucket, run_date=args.run_date)
     write_iceberg(df=df, table_name=cfg.table_name)
     spark.stop()
 
