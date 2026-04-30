@@ -41,7 +41,7 @@ def list_objects(bucket: str, prefix: str, run_date: str) -> list[str]:
         "s3",
         aws_access_key_id=os.getenv("AWS_ACCESS_KEY"),
         aws_secret_access_key=os.getenv("AWS_SECRET_KEY"),
-        region_name=os.getenv("AWS_REGION", "eu-central-1"),
+        endpoint_url='https://storage.yandexcloud.net',
     )
     paginator = s3.get_paginator("list_objects_v2")
     keys = []

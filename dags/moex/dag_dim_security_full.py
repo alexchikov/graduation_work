@@ -4,7 +4,7 @@ from datetime import datetime
 
 from airflow.decorators import dag, task
 
-from dags.moex.common import http_json, put_json_to_s3
+from dags.utils.moex.common import http_json, put_json_to_s3
 
 
 @dag(
