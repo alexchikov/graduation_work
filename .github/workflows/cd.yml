@@ -27,5 +27,6 @@ jobs:
 
       - name: Restart Airflow
         run: |
-          sudo -n /usr/bin/systemctl restart airflow-webserver
-          sudo -n /usr/bin/systemctl restart airflow-scheduler
+          export XDG_RUNTIME_DIR=/run/user/$(id -u)
+          systemctl --user restart airflow-webserver
+          systemctl --user restart airflow-scheduler
