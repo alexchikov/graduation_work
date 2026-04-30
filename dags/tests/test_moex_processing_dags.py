@@ -12,7 +12,7 @@ DAG_FILES = [
 
 
 def test_processing_dags_have_required_operators_and_steps():
-    root = Path("dags")
+    root = Path("dags/processing")
     for file_name in DAG_FILES:
         content = (root / file_name).read_text(encoding="utf-8")
         assert "S3KeySensor(" in content
