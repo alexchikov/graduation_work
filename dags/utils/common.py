@@ -1,9 +1,10 @@
-"""Common helpers for MOEX Airflow DAGs."""
+"""Shared helpers for Airflow DAGs and Spark apps."""
 
 from __future__ import annotations
 
 import json
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -11,9 +12,73 @@ import boto3
 import requests
 from airflow.exceptions import AirflowFailException
 from airflow.models import Variable
+from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql.types import (
+    BooleanType,
+    DateType,
+    DoubleType,
+    IntegerType,
+    LongType,
+    StringType,
+    StructField,
+    StructType,
+    TimestampType,
+)
 
 REQUEST_TIMEOUT_SEC = 30
 CONFIG_FILE_NAME = "config.yaml"
+
+
+_TYPE_MAPPING = {
+    "string": StringType(),
+    "str": StringType(),
+    "text": StringType(),
+    "double": DoubleType(),
+    "float": DoubleType(),
+    "number": DoubleType(),
+    "real": DoubleType(),
+    "int": IntegerType(),
+    "integer": IntegerType(),
+    "long": LongType(),
+    "bigint": LongType(),
+    "bool": BooleanType(),
+    "boolean": BooleanType(),
+    "date": DateType(),
+    "datetime": TimestampType(),
+    "timestamp": TimestampType(),
+}
+
+
+def _spark_type_from_metadata(meta: Any):
+    if isinstance(meta, dict):
+        type_name = str(meta.get("type") or meta.get("data_type") or "string").lower()
+    else:
+        type_name = str(meta or "string").lower()
+    return _TYPE_MAPPING.get(type_name, StringType())
+
+
+def _build_schema(payload: dict[str, Any], block_name: str) -> StructType:
+    block = payload.get(block_name, {})
+    columns = block.get("columns", [])
+    metadata = block.get("metadata", {})
+
+    fields: list[StructField] = []
+    for column in columns:
+        column_meta = metadata.get(column, {}) if isinstance(metadata, dict) else {}
+        fields.append(StructField(column, _spark_type_from_metadata(column_meta), True))
+
+    fields.extend([
+        StructField("source_key", StringType(), False),
+        StructField("run_date", StringType(), False),
+    ])
+    return StructType(fields)
+
+
+@dataclass(frozen=True)
+class AppConfig:
+    raw_prefix: str
+    payload_block: str
+    table_name: str
 
 
 def _load_local_config() -> dict[str, str]:
@@ -56,33 +121,31 @@ def bucket() -> str:
 
 
 def s3_client() -> Any:
-    access_key = cfg("AWS_ACCESS_KEY")
-    secret_key = cfg("AWS_SECRET_KEY")
-    if not access_key or not secret_key:
-        raise AirflowFailException("AWS credentials are required")
-    return boto3.client(
-        "s3",
-        endpoint_url='https://storage.yandexcloud.net',
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-    )
+    aws_access_key_id = cfg("AWS_ACCESS_KEY_ID") or cfg("AWS_ACCESS_KEY")
+    aws_secret_access_key = cfg("AWS_SECRET_ACCESS_KEY") or cfg("AWS_SECRET_KEY")
+    aws_session_token = cfg("AWS_SESSION_TOKEN")
 
-
-def http_json(
-    url: str,
-    params: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    try:
-        response = requests.get(
-            url,
-            params=params,
-            timeout=REQUEST_TIMEOUT_SEC,
+    client_kwargs: dict[str, Any] = {"endpoint_url": "https://storage.yandexcloud.net"}
+    if aws_access_key_id and aws_secret_access_key:
+        client_kwargs.update(
+            {
+                "aws_access_key_id": aws_access_key_id,
+                "aws_secret_access_key": aws_secret_access_key,
+            }
         )
+    if aws_session_token:
+        client_kwargs["aws_session_token"] = aws_session_token
+
+    return boto3.client("s3", **client_kwargs)
+
+
+def http_json(url: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+    try:
+        response = requests.get(url, params=params, timeout=REQUEST_TIMEOUT_SEC)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as exc:
-        msg = f"MOEX endpoint request failed: {url}"
-        raise AirflowFailException(msg) from exc
+        raise AirflowFailException(f"MOEX endpoint request failed: {url}") from exc
 
 
 def put_json_to_s3(key: str, payload: dict[str, Any]) -> str:
@@ -103,7 +166,65 @@ def notify_telegram(message: str) -> None:
         return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     try:
-        payload = {"chat_id": chat_id, "text": message}
-        requests.post(url, json=payload, timeout=10)
+        requests.post(url, json={"chat_id": chat_id, "text": message}, timeout=10)
     except requests.RequestException:
         return
+
+
+def build_spark(app_name: str, warehouse: str) -> SparkSession:
+    return (
+        SparkSession.builder.appName(app_name)
+        .config("spark.sql.catalog.processed", "org.apache.iceberg.spark.SparkCatalog")
+        .config("spark.sql.catalog.processed.type", "hadoop")
+        .config("spark.sql.catalog.processed.warehouse", warehouse)
+        .getOrCreate()
+    )
+
+
+def extract_rows(payload: dict[str, Any], block_name: str) -> list[dict[str, Any]]:
+    block = payload.get(block_name, {})
+    columns = block.get("columns", [])
+    data = block.get("data", [])
+    if not columns or not data:
+        return []
+    return [dict(zip(columns, row)) for row in data]
+
+
+def list_objects(bucket_name: str, prefix: str, run_date: str) -> list[str]:
+    s3 = s3_client()
+    keys: list[str] = []
+    for page in s3.get_paginator("list_objects_v2").paginate(Bucket=bucket_name, Prefix=prefix):
+        for obj in page.get("Contents", []):
+            key = obj["Key"]
+            if f"dt={run_date}/" in key or f"date={run_date}/" in key:
+                keys.append(key)
+    return keys
+
+
+def load_raw_df(spark: SparkSession, cfg: AppConfig, bucket_name: str, run_date: str) -> DataFrame:
+    keys = list_objects(bucket_name=bucket_name, prefix=cfg.raw_prefix, run_date=run_date)
+    if not keys:
+        raise ValueError(f"No raw files found for {cfg.raw_prefix} and date {run_date}")
+
+    s3 = s3_client()
+    rows: list[dict[str, Any]] = []
+    schema: StructType | None = None
+    for key in keys:
+        payload = json.loads(s3.get_object(Bucket=bucket_name, Key=key)["Body"].read())
+        if schema is None:
+            schema = _build_schema(payload=payload, block_name=cfg.payload_block)
+        for row in extract_rows(payload, cfg.payload_block):
+            row["source_key"] = key
+            row["run_date"] = run_date
+            rows.append(row)
+
+    if not rows:
+        raise ValueError(f"No rows extracted from {cfg.payload_block}")
+    if schema is None:
+        raise ValueError(f"Unable to build schema for {cfg.payload_block}")
+
+    return spark.createDataFrame(rows, schema=schema).dropDuplicates()
+
+
+def write_iceberg(df: DataFrame, table_name: str) -> None:
+    df.writeTo(table_name).using("iceberg").tableProperty("format-version", "2").createOrReplace()

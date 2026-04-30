@@ -13,6 +13,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v5
 
+      - name: Detect dependency changes
+        id: deps_changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            pyproject:
+              - pyproject.toml
+
       - name: Deploy project files
         run: |
           cd /home/airflow
@@ -26,6 +34,7 @@ jobs:
           /home/airflow/.local/bin/poetry install --no-root
 
       - name: Restart Airflow
+        if: steps.deps_changes.outputs.pyproject == 'true'
         run: |
           export XDG_RUNTIME_DIR=/run/user/$(id -u)
           systemctl --user restart airflow-webserver
