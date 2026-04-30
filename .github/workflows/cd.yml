@@ -25,7 +25,7 @@ jobs:
         run: |
           cd /home/airflow
           cp ${{ github.workspace }}/pyproject.toml /home/airflow/
-          cp -r ${{ github.workspace }}/dags /home/airflow/s/
+          cp -r ${{ github.workspace }}/dags /home/airflow/
 
       - name: Install dependencies
         run: |
