@@ -34,15 +34,29 @@ def extract_rows(payload: dict[str, Any], block_name: str) -> list[dict[str, Any
     return [dict(zip(columns, row)) for row in data]
 
 
-def list_objects(bucket: str, prefix: str, run_date: str) -> list[str]:
+def _build_s3_client():
     import boto3
 
-    s3 = boto3.client(
-        "s3",
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_KEY"),
-        endpoint_url='https://storage.yandexcloud.net',
-    )
+    aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("AWS_ACCESS_KEY")
+    aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("AWS_SECRET_KEY")
+    aws_session_token = os.getenv("AWS_SESSION_TOKEN")
+
+    client_kwargs = {"endpoint_url": "https://storage.yandexcloud.net"}
+    if aws_access_key_id and aws_secret_access_key:
+        client_kwargs.update(
+            {
+                "aws_access_key_id": aws_access_key_id,
+                "aws_secret_access_key": aws_secret_access_key,
+            }
+        )
+    if aws_session_token:
+        client_kwargs["aws_session_token"] = aws_session_token
+
+    return boto3.client("s3", **client_kwargs)
+
+
+def list_objects(bucket: str, prefix: str, run_date: str) -> list[str]:
+    s3 = _build_s3_client()
     paginator = s3.get_paginator("list_objects_v2")
     keys = []
     for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
@@ -58,14 +72,7 @@ def load_raw_df(spark: SparkSession, cfg: AppConfig, bucket: str, run_date: str)
     if not keys:
         raise ValueError(f"No raw files found for {cfg.raw_prefix} and date {run_date}")
 
-    import boto3
-
-    s3 = boto3.client(
-        "s3",
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_KEY"),
-        endpoint_url='https://storage.yandexcloud.net'
-    )
+    s3 = _build_s3_client()
 
     rows: list[dict[str, Any]] = []
     for key in keys:
