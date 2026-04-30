@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import date, datetime
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -72,6 +73,48 @@ def _build_schema(payload: dict[str, Any], block_name: str) -> StructType:
         StructField("run_date", StringType(), False),
     ])
     return StructType(fields)
+
+
+def _coerce_value(value: Any, spark_type: Any) -> Any:
+    if value is None:
+        return None
+
+    if isinstance(spark_type, StringType):
+        return str(value)
+    if isinstance(spark_type, DoubleType):
+        return float(value)
+    if isinstance(spark_type, IntegerType):
+        return int(value)
+    if isinstance(spark_type, LongType):
+        return int(value)
+    if isinstance(spark_type, BooleanType):
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            lowered = value.strip().lower()
+            if lowered in {"true", "1", "yes", "y"}:
+                return True
+            if lowered in {"false", "0", "no", "n"}:
+                return False
+        return bool(value)
+    if isinstance(spark_type, DateType):
+        if isinstance(value, date) and not isinstance(value, datetime):
+            return value
+        if isinstance(value, datetime):
+            return value.date()
+        return date.fromisoformat(str(value))
+    if isinstance(spark_type, TimestampType):
+        if isinstance(value, datetime):
+            return value
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    return value
+
+
+def _coerce_row_types(row: dict[str, Any], schema: StructType) -> dict[str, Any]:
+    normalized: dict[str, Any] = {}
+    for field in schema.fields:
+        normalized[field.name] = _coerce_value(row.get(field.name), field.dataType)
+    return normalized
 
 
 @dataclass(frozen=True)
@@ -223,7 +266,8 @@ def load_raw_df(spark: SparkSession, app_cfg: AppConfig, bucket_name: str, run_d
     if schema is None:
         raise ValueError(f"Unable to build schema for {app_cfg.payload_block}")
 
-    return spark.createDataFrame(rows, schema=schema).dropDuplicates()
+    normalized_rows = [_coerce_row_types(row, schema) for row in rows]
+    return spark.createDataFrame(normalized_rows, schema=schema).dropDuplicates()
 
 
 def write_iceberg(df: DataFrame, table_name: str) -> None:
