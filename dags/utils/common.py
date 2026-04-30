@@ -201,10 +201,10 @@ def list_objects(bucket_name: str, prefix: str, run_date: str) -> list[str]:
     return keys
 
 
-def load_raw_df(spark: SparkSession, cfg: AppConfig, bucket_name: str, run_date: str) -> DataFrame:
-    keys = list_objects(bucket_name=bucket_name, prefix=cfg.raw_prefix, run_date=run_date)
+def load_raw_df(spark: SparkSession, app_cfg: AppConfig, bucket_name: str, run_date: str) -> DataFrame:
+    keys = list_objects(bucket_name=bucket_name, prefix=app_cfg.raw_prefix, run_date=run_date)
     if not keys:
-        raise ValueError(f"No raw files found for {cfg.raw_prefix} and date {run_date}")
+        raise ValueError(f"No raw files found for {app_cfg.raw_prefix} and date {run_date}")
 
     s3 = s3_client()
     rows: list[dict[str, Any]] = []
@@ -212,16 +212,16 @@ def load_raw_df(spark: SparkSession, cfg: AppConfig, bucket_name: str, run_date:
     for key in keys:
         payload = json.loads(s3.get_object(Bucket=bucket_name, Key=key)["Body"].read())
         if schema is None:
-            schema = _build_schema(payload=payload, block_name=cfg.payload_block)
-        for row in extract_rows(payload, cfg.payload_block):
+            schema = _build_schema(payload=payload, block_name=app_cfg.payload_block)
+        for row in extract_rows(payload, app_cfg.payload_block):
             row["source_key"] = key
             row["run_date"] = run_date
             rows.append(row)
 
     if not rows:
-        raise ValueError(f"No rows extracted from {cfg.payload_block}")
+        raise ValueError(f"No rows extracted from {app_cfg.payload_block}")
     if schema is None:
-        raise ValueError(f"Unable to build schema for {cfg.payload_block}")
+        raise ValueError(f"Unable to build schema for {app_cfg.payload_block}")
 
     return spark.createDataFrame(rows, schema=schema).dropDuplicates()
 
