@@ -39,7 +39,7 @@ with DAG(
                 "--clickhouse-database", "{{ var.value.CLICKHOUSE_DATABASE }}",
                 "--clickhouse-user", "{{ var.value.CLICKHOUSE_USER }}",
                 "--clickhouse-password", "{{ var.value.CLICKHOUSE_PASSWORD }}",
-                "--mode", "overwrite",
+                "--mode", "append",
             ],
             conf={
                 "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
