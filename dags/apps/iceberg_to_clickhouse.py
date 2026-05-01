@@ -16,7 +16,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--clickhouse-database", default=os.getenv("CLICKHOUSE_DATABASE", "default"))
     parser.add_argument("--clickhouse-user", default=os.getenv("CLICKHOUSE_USER", "default"))
     parser.add_argument("--clickhouse-password", default=os.getenv("CLICKHOUSE_PASSWORD", ""))
-    parser.add_argument("--mode", default="overwrite", choices=["overwrite", "append"])
+    parser.add_argument("--mode", default="append", choices=["overwrite", "append"])
     return parser.parse_args()
 
 
