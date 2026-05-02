@@ -6,7 +6,7 @@ This graduation project focuses on the design and implementation of an ETL proce
 
 The project implements a modern **Data Lakehouse architecture** based on **AWS S3**, **Apache Iceberg**, **Apache Airflow**, and **ClickHouse**. The main goal is to build a reliable data pipeline that extracts raw data from external sources, stores it in a scalable object storage layer, processes it using lakehouse principles, and prepares it for analytical consumption.
 
-The final processed data is planned to be used for analytics and reporting through **Power BI**.
+The final processed data is planned to be used for analytics and reporting through **Metabase**.
 
 ---
 
@@ -95,9 +95,9 @@ The final data model for ClickHouse is currently being evaluated. Possible optio
 
 ---
 
-### 6. Power BI
+### 6. Metabase
 
-Power BI is used as the reporting and visualization layer.
+Metabase is used as the reporting and visualization layer.
 
 It connects to the analytical storage layer and allows end users to build dashboards, monitor key metrics, and analyze consolidated data.
 
