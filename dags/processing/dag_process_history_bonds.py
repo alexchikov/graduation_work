@@ -20,7 +20,7 @@ with DAG(
         bucket_key="raw/moex/history/bonds/date={{ ds }}/*",
         wildcard_match=True,
         poke_interval=60,
-        timeout=60 * 30,
+        timeout=60 * 60 * 12,
     )
 
     process = SparkSubmitOperator(

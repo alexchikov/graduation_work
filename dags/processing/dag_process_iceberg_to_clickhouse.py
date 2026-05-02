@@ -18,7 +18,7 @@ TABLE_MAPPINGS = [
 with DAG(
     dag_id="moex_process_iceberg_to_clickhouse",
     start_date=datetime(2025, 1, 1),
-    schedule="40 6 * * *",
+    schedule="0 23 * * *",
     catchup=False,
     tags=["moex", "spark", "iceberg", "clickhouse", "gold"],
 ) as dag:
