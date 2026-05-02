@@ -10,7 +10,7 @@ from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOpe
 with DAG(
     dag_id="moex_process_history_shares_iceberg",
     start_date=datetime(2025, 1, 1),
-    schedule="15 6 * * *",
+    schedule="0 20 * * *",
     catchup=False,
     tags=["moex", "spark", "iceberg", "processed"],
 ) as dag:
