@@ -1,4 +1,5 @@
 name: CI
+
 on:
   push:
     branches:
@@ -7,37 +8,33 @@ on:
       - codex/*
 
 jobs:
-  build:
+  test:
     runs-on: test
+
     steps:
       - uses: actions/checkout@v5
-      - name: list files
-        run: ls -la $GITHUB_WORKSPACE
-      - name: Build Docker
-        run: docker build --progress=plain --no-cache -t dags:latest .
 
-  test:
-    needs: build
-    runs-on: test
-    steps:
+      - name: Build Docker
+        run: docker build --progress=plain -t dags:${{ github.sha }} .
+
       - name: Run tests
-        run: docker run --rm dags:latest
+        run: docker run --rm dags:${{ github.sha }}
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rm -f test_dags || true
+          docker rmi dags:${{ github.sha }} || true
 
   code_quality:
     needs: test
     runs-on: test
-    steps:
-      - name: install dependencies
-        run: poetry install --no-root
-      - name: check code quality
-        run: poetry run flake8 . --count --select=E,F --ignore=E226,E302,E305,E501 --show-source --statistics
 
-  cleanup:
-    needs: test
-    runs-on: test
-    if: always()
     steps:
-      - name: Cleanup
-        run: |
-          docker rm -f test_dags || true
-          docker rmi dags:latest || true
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: poetry install --no-root
+
+      - name: Check code quality
+        run: poetry run flake8 . --count --select=E,F --ignore=E226,E302,E305,E501 --show-source --statistics
