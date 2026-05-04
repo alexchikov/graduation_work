@@ -101,6 +101,10 @@ Metabase is used as the reporting and visualization layer.
 
 It connects to the analytical storage layer and allows end users to build dashboards, monitor key metrics, and analyze consolidated data.
 
+The implemented dashboard displays consolidated MOEX analytics, including KPI metrics, turnover dynamics, top traded instruments, bond maturity structure, yield and duration distribution, and data quality indicators.
+
+![Metabase dashboard](resources/img/metabase_dashboard.png)
+
 ---
 
 ## Repository Rules
